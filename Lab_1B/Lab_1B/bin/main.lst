@@ -1,0 +1,167 @@
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+    1    1                      ;**************************************************************************************
+    2    2                      ;* 1B Project Main [includes LibV2.2]                                                 *
+    3    3                      ;**************************************************************************************
+    4    4                      ;* Summary:                                                                           *
+    5    5                      ;*   -                                                                                *
+    6    6                      ;*                                                                                    *
+    7    7                      ;* Author: BENJAMIN FIELDS AND MILES ALDERMAN                                         *                         *
+    8    8                      ;*   Cal Poly University                                                              *
+    9    9                      ;*   Spring 2022                                                                      *
+   10   10                      ;*                                                                                    *
+   11   11                      ;* Revision History:                                                                  *
+   12   12                      ;*   -                                                                                *
+   13   13                      ;*                                                                                    *
+   14   14                      ;* ToDo:                                                                              *
+   15   15                      ;*   -                                                                                *
+   16   16                      ;**************************************************************************************
+   17   17                      
+   18   18                      ;/------------------------------------------------------------------------------------\
+   19   19                      ;| Include all associated files                                                       |
+   20   20                      ;\------------------------------------------------------------------------------------/
+   21   21                      ; The following are external files to be included during assembly
+   22   22                      
+   23   23                      
+   24   24                      ;/------------------------------------------------------------------------------------\
+   25   25                      ;| External Definitions                                                               |
+   26   26                      ;\------------------------------------------------------------------------------------/
+   27   27                      ; All labels that are referenced by the linker need an external definition
+   28   28                      
+   29   29                                    XDEF  main
+   30   30                      
+   31   31                      ;/------------------------------------------------------------------------------------\
+   32   32                      ;| External References                                                                |
+   33   33                      ;\------------------------------------------------------------------------------------/
+   34   34                      ; All labels from other files must have an external reference
+   35   35                      
+   36   36                                    XREF  ENABLE_MOTOR, DISABLE_MOTOR
+   37   37                                    XREF  STARTUP_MOTOR, UPDATE_MOTOR, CURRENT_MOTOR
+   38   38                                    XREF  STARTUP_PWM, STARTUP_ATD0, STARTUP_ATD1
+   39   39                                    XREF  OUTDACA, OUTDACB
+   40   40                                    XREF  STARTUP_ENCODER, READ_ENCODER
+   41   41                                    XREF  INITLCD, SETADDR, GETADDR, CURSOR_ON, CURSOR_OFF, DISP_OFF
+   42   42                                    XREF  OUTCHAR, OUTCHAR_AT, OUTSTRING, OUTSTRING_AT
+   43   43                                    XREF  INITKEY, LKEY_FLG, GETCHAR
+   44   44                                    XREF  LCDTEMPLATE, UPDATELCD_L1, UPDATELCD_L2
+   45   45                                    XREF  LVREF_BUF, LVACT_BUF, LERR_BUF,LEFF_BUF, LKP_BUF, LKI_BUF
+   46   46                                    XREF  Entry, ISR_KEYPAD
+   47   47                                  
+   48   48                      ;/------------------------------------------------------------------------------------\
+   49   49                      ;| Assembler Equates                                                                  |
+   50   50                      ;\------------------------------------------------------------------------------------/
+   51   51                      ; Constant values can be equated here
+   52   52                      
+   53   53          0000 0240   PORTT         EQU   $0240              ; input port for DELAY_CNT 
+   54   54          0000 0242   DDRT          EQU   $0242 
+   55   55          0000 0258   PORTP         EQU   $0258              ; output port for driving LEDs 
+   56   56          0000 025A   DDRP          EQU   $025A 
+   57   57          0000 0030   LED_MSK       EQU   %00110000          ; LED output pins 
+   58   58          0000 0010   G_LED         EQU   %00010000          ; green LED output pin 
+   59   59          0000 0020   R_LED         EQU   %00100000          ; red LED output pin 
+   60   60                      
+   61   61                      ;/------------------------------------------------------------------------------------\
+   62   62                      ;| Variables in RAM                                                                   |
+   63   63                      ;\------------------------------------------------------------------------------------/
+   64   64                      ; The following variables are located in unpaged ram
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+   65   65                      
+   66   66                      DEFAULT_RAM:  SECTION
+   67   67                      
+   68   68   000000             DELAY_CNT     DS.B  1 
+   69   69                      
+   70   70                      ;/------------------------------------------------------------------------------------\
+   71   71                      ;|  Main Program Code                                                                 |
+   72   72                      ;\------------------------------------------------------------------------------------/
+   73   73                      ; This code implements Lab_1A for ME 305
+   74   74                      
+   75   75                      MyCode:       SECTION
+   76   76                      
+   77   77   000000 16xx xx     main:   jsr   SETUP                  ; jump to SETUP subroutine  
+   78   78   000003 1C02 5810   proc:   bset  PORTP, G_LED           ; turn green LED on
+   79   79   000007 16xx xx             jsr   DELAY
+   80   80   00000A 1D02 5830           bclr  PORTP, LED_MSK         ; turn both LEDs off
+   81   81   00000E 16xx xx             jsr   DELAY
+   82   82   000011 1C02 5820           bset  PORTP, R_LED           ; turn red LED on
+   83   83   000015 16xx xx             jsr   DELAY
+   84   84   000018 1D02 5830           bclr  PORTP, LED_MSK         ; turn both LEDs off
+   85   85   00001C 16xx xx             jsr   DELAY
+   86   86   00001F 1C02 5830           bset  PORTP, LED_MSK         ; turn both LEDs on
+   87   87   000023 16xx xx             jsr   DELAY
+   88   88   000026 1D02 5830           bclr  PORTP, LED_MSK         ; turn both LEDs off    
+   89   89   00002A 16xx xx             jsr   DELAY                  ; delay
+   90   90   00002D 20D4                bra   proc
+   91   91                              
+   92   92                               
+   93   93                      
+   94   94   00002F 20FE        spin:   bra   spin 
+   95   95                      
+   96   96                      
+   97   97                      ;/------------------------------------------------------------------------------------\
+   98   98                      ;| Subroutines                                                                        |
+   99   99                      ;\------------------------------------------------------------------------------------/
+  100  100                      ; General purpose subroutines go here
+  101  101                      
+  102  102                      ;-----------Delay----------------------------------------------------------------- 
+  103  103                      DELAY:       
+  104  104   000031 B602 40             ldaa  PORTT                    ; (3) load 8-bit DELAY_CNT from PORTT 
+  105  105   000034 7Axx xx             staa  DELAY_CNT                ; (3) 
+  106  106                      OUTER:                                 ; outer loop 
+  107  107   000037 B6xx xx             ldaa  DELAY_CNT                ; (3) 
+  108  108   00003A 8100                cmpa  #0                       ; (1) 
+  109  109   00003C 2717                beq   EXIT                     ; (1) 
+  110  110   00003E 73xx xx             dec   DELAY_CNT                ; (4) 
+  111  111   000041 CE00 05             ldx   #$0005                   ; (2) 
+  112  112                      MIDDLE:                                ; middle loop 
+  113  113   000044 8E00 00             cpx   #0                       ; (2) 
+  114  114   000047 27EE                beq   OUTER                    ; (1) 
+  115  115   000049 09                  dex                            ; (1) 
+  116  116   00004A CD77 10             ldy   #$7710                   ; (2) 
+  117  117                      INNER:                                 ; inner loop 
+  118  118   00004D 8D00 00             cpy   #0                       ; (2) 
+  119  119   000050 27F2                beq   MIDDLE                   ; (1) 
+  120  120   000052 03                  dey                            ; (1) 
+  121  121   000053 20F8                bra   INNER                    ; (3) 
+  122  122                      EXIT: 
+  123  123   000055 3D                  rts                            ; (5) exit DELAY 
+  124  124                      
+  125  125                      SETUP: 
+  126  126                      ; setup IO ports 
+  127  127                       
+  128  128   000056 7902 42             clr   DDRT                     ; set PORTT to input 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  129  129   000059 1D02 5830           bclr  PORTP, LED_MSK           ; initialize LEDs to off 
+  130  130   00005D 1C02 5A30           bset  DDRP,LED_MSK             ; set LED pins to output 
+  131  131   000061 3D                  rts                            ; exit SETUP 
+  132  132                       
+  133  133                      ; end subroutine SETUP 
+  134  134                      
+  135  135                      ;/------------------------------------------------------------------------------------\
+  136  136                      ;| ASCII Messages and Constant Data                                                   |
+  137  137                      ;\------------------------------------------------------------------------------------/
+  138  138                      ; Any constants can be defined here
+  139  139                      
+  140  140                      
+  141  141                      ;/------------------------------------------------------------------------------------\
+  142  142                      ;| Vectors                                                                            |
+  143  143                      ;\------------------------------------------------------------------------------------/
+  144  144                      ; Add interrupt and reset vectors here
+  145  145                      
+  146  146                              ORG   $FFFE                    ; reset vector address
+  147  147  a00FFFE xxxx                DC.W  Entry
+  148  148                              ORG   $FFCE                    ; Key Wakeup interrupt vector address [Port J]
+  149  149  a00FFCE xxxx                DC.W  ISR_KEYPAD

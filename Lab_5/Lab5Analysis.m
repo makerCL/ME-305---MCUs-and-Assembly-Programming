@@ -1,0 +1,26 @@
+%% Lab 3 System Analysis
+close all;
+load('Step Response Run.mat');
+sim('lab3model');
+tank1=data{1}.Values.Data;
+tout=data{1}.Values.Time;
+tank1smooth=smoothdata(tank1);
+figure;
+plot(tout,tank1);
+hold on;
+plot(tout,tank1smooth);
+hold on;
+plot(out.tout,out.tank1);
+tank2=data{3}.Values.Data;
+hold off;
+figure;
+plot(tout,tank2);
+hold on;
+plot(out.tout,out.tank2);
+load('Disturbance Response Run.mat');
+tank2disturb=data{3}.Values.Data;
+toutdisturb=data{3}.Values.Time;
+figure;
+plot(toutdisturb,tank2disturb);
+hold on;
+plot(ans.tout,ans.tank2disturb);

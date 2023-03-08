@@ -1,0 +1,117 @@
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+    1    1                      ;**************************************************************************************
+    2    2                      ;* Blank Project Main [includes LibV2.2]                                              *
+    3    3                      ;**************************************************************************************
+    4    4                      ;* Summary:                                                                           *
+    5    5                      ;*   -                                                                                *
+    6    6                      ;*                                                                                    *
+    7    7                      ;* Author: BENJAMIN FIELDS AND MILES ALDERMAN                                                                  *
+    8    8                      ;*   Cal Poly University                                                              *
+    9    9                      ;*   Spring 2022                                                                      *
+   10   10                      ;*                                                                                    *
+   11   11                      ;* Revision History:                                                                  *
+   12   12                      ;*   -                                                                                *
+   13   13                      ;*                                                                                    *
+   14   14                      ;* ToDo:                                                                              *
+   15   15                      ;*   -                                                                                *
+   16   16                      ;**************************************************************************************
+   17   17                      
+   18   18                      ;/------------------------------------------------------------------------------------\
+   19   19                      ;| Include all associated files                                                       |
+   20   20                      ;\------------------------------------------------------------------------------------/
+   21   21                      ; The following are external files to be included during assembly
+   22   22                      
+   23   23                      
+   24   24                      ;/------------------------------------------------------------------------------------\
+   25   25                      ;| External Definitions                                                               |
+   26   26                      ;\------------------------------------------------------------------------------------/
+   27   27                      ; All labels that are referenced by the linker need an external definition
+   28   28                      
+   29   29                                    XDEF  main
+   30   30                      
+   31   31                      ;/------------------------------------------------------------------------------------\
+   32   32                      ;| External References                                                                |
+   33   33                      ;\------------------------------------------------------------------------------------/
+   34   34                      ; All labels from other files must have an external reference
+   35   35                      
+   36   36                                    XREF  ENABLE_MOTOR, DISABLE_MOTOR
+   37   37                                    XREF  STARTUP_MOTOR, UPDATE_MOTOR, CURRENT_MOTOR
+   38   38                                    XREF  STARTUP_PWM, STARTUP_ATD0, STARTUP_ATD1
+   39   39                                    XREF  OUTDACA, OUTDACB
+   40   40                                    XREF  STARTUP_ENCODER, READ_ENCODER
+   41   41                                    XREF  INITLCD, SETADDR, GETADDR, CURSOR_ON, CURSOR_OFF, DISP_OFF
+   42   42                                    XREF  OUTCHAR, OUTCHAR_AT, OUTSTRING, OUTSTRING_AT
+   43   43                                    XREF  INITKEY, LKEY_FLG, GETCHAR
+   44   44                                    XREF  LCDTEMPLATE, UPDATELCD_L1, UPDATELCD_L2
+   45   45                                    XREF  LVREF_BUF, LVACT_BUF, LERR_BUF,LEFF_BUF, LKP_BUF, LKI_BUF
+   46   46                                    XREF  Entry, ISR_KEYPAD
+   47   47                                  
+   48   48                      ;/------------------------------------------------------------------------------------\
+   49   49                      ;| Assembler Equates                                                                  |
+   50   50                      ;\------------------------------------------------------------------------------------/
+   51   51                      ; Constant values can be equated here
+   52   52                      
+   53   53                      
+   54   54                      
+   55   55                      ;/------------------------------------------------------------------------------------\
+   56   56                      ;| Variables in RAM                                                                   |
+   57   57                      ;\------------------------------------------------------------------------------------/
+   58   58                      ; The following variables are located in unpaged ram
+   59   59                      
+   60   60                      DEFAULT_RAM:  SECTION
+   61   61                      
+   62   62   000000             FIRST:        DS.B  1          ; reserved space for addend
+   63   63   000001             SECOND:       DS.B  1          ; reserved space for augend
+   64   64   000002             RESULT:       DS.B  1          ; reserved space for result
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+   65   65                      
+   66   66                      ;/------------------------------------------------------------------------------------\
+   67   67                      ;|  Main Program Code                                                                 |
+   68   68                      ;\------------------------------------------------------------------------------------/
+   69   69                      ; This code implements Lab_1A for ME 305
+   70   70                      
+   71   71                      MyCode:       SECTION
+   72   72                      
+   73   73   000000 00          main:   bgnd
+   74   74   000001 180B 04xx           movb  #$04, FIRST              ; initialize addend in FIRST
+             000005 xx         
+   75   75   000006 180B 06xx           movb  #$06, SECOND             ; initialize augend in SECOND
+             00000A xx         
+   76   76   00000B B6xx xx             ldaa  FIRST                    ; load accumulator A with addend
+   77   77   00000E F6xx xx             ldab  SECOND                   ; load accumulator B with augend
+   78   78   000011 1806                aba                            ; add contents of B to contents of A
+   79   79   000013 7Axx xx             staa  RESULT                   ; copy contents of A to result             
+   80   80   000016 20FE        spin:   bra   spin                     ; endless horizontal loop
+   81   81                      
+   82   82                      
+   83   83                      ;/------------------------------------------------------------------------------------\
+   84   84                      ;| Subroutines                                                                        |
+   85   85                      ;\------------------------------------------------------------------------------------/
+   86   86                      ; General purpose subroutines go here
+   87   87                      
+   88   88                      
+   89   89                      ;/------------------------------------------------------------------------------------\
+   90   90                      ;| ASCII Messages and Constant Data                                                   |
+   91   91                      ;\------------------------------------------------------------------------------------/
+   92   92                      ; Any constants can be defined here
+   93   93                      
+   94   94                      
+   95   95                      ;/------------------------------------------------------------------------------------\
+   96   96                      ;| Vectors                                                                            |
+   97   97                      ;\------------------------------------------------------------------------------------/
+   98   98                      ; Add interrupt and reset vectors here
+   99   99                      
+  100  100                              ORG   $FFFE                    ; reset vector address
+  101  101  a00FFFE xxxx                DC.W  Entry
+  102  102                              ORG   $FFCE                    ; Key Wakeup interrupt vector address [Port J]
+  103  103  a00FFCE xxxx                DC.W  ISR_KEYPAD

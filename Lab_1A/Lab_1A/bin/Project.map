@@ -1,0 +1,214 @@
+
+PROGRAM "C:\Users\melab15\OneDrive - Cal Poly\ME305 Lab\Lab_1A\Lab_1A\bin\Project.abs"
+
+*********************************************************************************************
+TARGET SECTION
+---------------------------------------------------------------------------------------------
+Processor   : Freescale HC12
+Memory Model: SMALL
+File Format : ELF\DWARF 2.0
+Linker      : SmartLinker V-5.0.40 Build 10203, Jul 23 2010
+
+*********************************************************************************************
+FILE SECTION
+---------------------------------------------------------------------------------------------
+main.asm.o                              Model: SMALL,         Lang: Assembler
+Lib_Delay.asm.o (ME305LIBV2.2.lib)      Model: SMALL,         Lang: Assembler
+Lib_Encoder.asm.o (ME305LIBV2.2.lib)    Model: SMALL,         Lang: Assembler
+Lib_Keypad.asm.o (ME305LIBV2.2.lib)     Model: SMALL,         Lang: Assembler
+Lib_Startup.asm.o (ME305LIBV2.2.lib)    Model: SMALL,         Lang: Assembler
+
+*********************************************************************************************
+STARTUP SECTION
+---------------------------------------------------------------------------------------------
+Entry point: 0xC000 (Entry)
+
+*********************************************************************************************
+SECTION-ALLOCATION SECTION
+Section Name                    Size  Type     From       To       Segment
+---------------------------------------------------------------------------------------------
+.init                            227     R     0xC000     0xC0E2   ROM_C000
+.stack                          1024   R/W     0x2000     0x23FF   RAM
+.data                              3   R/W     0x2400     0x2402   RAM
+LIBRARY_RAM                        3   R/W     0x1000     0x1002   LIBRAM
+MyCode                            24     R     0x4000     0x4017   ROM_4000
+Lib_Keypad                       117     R      0x800      0x874   EEPROM
+Lib_Encoder                      177     R      0x875      0x925   EEPROM
+Lib_Delay                         56     R      0x926      0x95D   EEPROM
+main.asm__ORG00001                 2     R     0xFFFE     0xFFFF   .absSeg0
+main.asm__ORG00002                 2     R     0xFFCE     0xFFCF   .absSeg1
+
+Summary of section sizes per section type:
+READ_ONLY (R):         25D (dec:      605)
+READ_WRITE (R/W):      406 (dec:     1030)
+
+*********************************************************************************************
+VECTOR-ALLOCATION SECTION
+    Address     InitValue   InitFunction
+---------------------------------------------------------------------------------------------
+
+*********************************************************************************************
+OBJECT-ALLOCATION SECTION
+     Name               Module                 Addr   hSize   dSize     Ref    Section   RLIB
+---------------------------------------------------------------------------------------------
+MODULE:                 -- main.asm.o --
+- PROCEDURES:
+     main                                      4000      16      22       1   MyCode      
+     spin                                      4016       2       2       0   MyCode      
+- VARIABLES:
+     FIRST                                     2400       1       1       2   .data       
+     SECOND                                    2401       1       1       2   .data       
+     RESULT                                    2402       1       1       1   .data       
+     VAR00001                                  FFFE       2       2       0   .text       
+     VAR00002                                  FFCE       2       2       0   .text       
+MODULE:                 -- Lib_Delay.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     DELAY_MICRO                                926       F      15       1   Lib_Delay   
+     MICRO_Loop                                 935       D      13       0   Lib_Delay   
+     DELAY_MILLI                                942       F      15       1   Lib_Delay   
+     MILLI_Loop                                 951       D      13       0   Lib_Delay   
+- VARIABLES:
+MODULE:                 -- Lib_Encoder.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     STARTUP_ENCODER                            875      51      81       0   Lib_Encoder 
+     READ_ENCODER                               8C6      37      55       0   Lib_Encoder 
+     DISABLE_ENCODER                            8FD      29      41       1   Lib_Encoder 
+- VARIABLES:
+MODULE:                 -- Lib_Keypad.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     INITKEY                                    800      35      53       0   Lib_Keypad  
+     GETCHAR                                    835      10      16       0   Lib_Keypad  
+     ISR_KEYPAD                                 845      1C      28       1   Lib_Keypad  
+     VAR00001                                   861      14      20       1   Lib_Keypad  
+- VARIABLES:
+     KEYREADY                                  1000       1       1       0   LIBRARY_RAM 
+     LCHARACTER                                1001       1       1       4   LIBRARY_RAM 
+     LKEY_FLG                                  1002       1       1       3   LIBRARY_RAM 
+MODULE:                 -- Lib_Startup.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     _Startup                                  C000      13      19       0   .init       
+     Entry                                     C000       0       0       1   .init       
+     STARTUP_PLL                               C013      20      32       1   .init       
+     STARTUP_SPI0                              C033      45      69       1   .init       
+     STARTUP_ATD1                              C078      1A      26       0   .init       
+     STARTUP_PWM                               C092      1D      29       0   .init       
+     STARTUP_IO                                C0AF      34      52       1   .init       
+- VARIABLES:
+- LABELS:
+     __SEG_END_SSTACK                          2400       0       0       1               
+
+*********************************************************************************************
+MODULE STATISTIC
+  Name                                      Data   Code  Const
+---------------------------------------------------------------------------------------------
+  main.asm.o                                   3     24      4
+  Lib_Delay.asm.o (ME305LIBV2.2.lib)           0     56      0
+  Lib_Encoder.asm.o (ME305LIBV2.2.lib)         0    177      0
+  Lib_Keypad.asm.o (ME305LIBV2.2.lib)          3    117      0
+  Lib_Startup.asm.o (ME305LIBV2.2.lib)         0    227      0
+  other                                     1024      0      0
+
+*********************************************************************************************
+SECTION USE IN OBJECT-ALLOCATION SECTION
+---------------------------------------------------------------------------------------------
+SECTION: ".text"
+  VAR00002 VAR00001 
+SECTION: ".data"
+  FIRST SECOND RESULT 
+SECTION: ".init"
+  Entry _Startup STARTUP_PLL STARTUP_SPI0 STARTUP_ATD1 STARTUP_PWM STARTUP_IO 
+SECTION: "LIBRARY_RAM"
+  KEYREADY LCHARACTER LKEY_FLG 
+SECTION: "MyCode"
+  main spin 
+SECTION: "Lib_Keypad"
+  INITKEY GETCHAR ISR_KEYPAD VAR00001 
+SECTION: "Lib_Encoder"
+  STARTUP_ENCODER READ_ENCODER DISABLE_ENCODER 
+SECTION: "Lib_Delay"
+  DELAY_MICRO MICRO_Loop DELAY_MILLI MILLI_Loop 
+
+*********************************************************************************************
+OBJECT LIST SORTED BY ADDRESS
+     Name                                      Addr   hSize   dSize     Ref    Section   RLIB
+---------------------------------------------------------------------------------------------
+     INITKEY                                    800      35      53       0   Lib_Keypad  
+     GETCHAR                                    835      10      16       0   Lib_Keypad  
+     ISR_KEYPAD                                 845      1C      28       1   Lib_Keypad  
+     VAR00001                                   861      14      20       1   Lib_Keypad  
+     STARTUP_ENCODER                            875      51      81       0   Lib_Encoder 
+     READ_ENCODER                               8C6      37      55       0   Lib_Encoder 
+     DISABLE_ENCODER                            8FD      29      41       1   Lib_Encoder 
+     DELAY_MICRO                                926       F      15       1   Lib_Delay   
+     MICRO_Loop                                 935       D      13       0   Lib_Delay   
+     DELAY_MILLI                                942       F      15       1   Lib_Delay   
+     MILLI_Loop                                 951       D      13       0   Lib_Delay   
+     KEYREADY                                  1000       1       1       0   LIBRARY_RAM 
+     LCHARACTER                                1001       1       1       4   LIBRARY_RAM 
+     LKEY_FLG                                  1002       1       1       3   LIBRARY_RAM 
+     FIRST                                     2400       1       1       2   .data       
+     SECOND                                    2401       1       1       2   .data       
+     RESULT                                    2402       1       1       1   .data       
+     main                                      4000      16      22       1   MyCode      
+     spin                                      4016       2       2       0   MyCode      
+     Entry                                     C000       0       0       1   .init       
+     _Startup                                  C000      13      19       0   .init       
+     STARTUP_PLL                               C013      20      32       1   .init       
+     STARTUP_SPI0                              C033      45      69       1   .init       
+     STARTUP_ATD1                              C078      1A      26       0   .init       
+     STARTUP_PWM                               C092      1D      29       0   .init       
+     STARTUP_IO                                C0AF      34      52       1   .init       
+     VAR00002                                  FFCE       2       2       0   .text       
+     VAR00001                                  FFFE       2       2       0   .text       
+
+*********************************************************************************************
+UNUSED-OBJECTS SECTION
+---------------------------------------------------------------------------------------------
+NOT USED VARIABLES
+main.asm.o:
+  LVREF_BUF LVACT_BUF LERR_BUF LEFF_BUF LKP_BUF LKI_BUF 
+
+*********************************************************************************************
+COPYDOWN SECTION
+---------------------------------------------------------------------------------------------
+
+*********************************************************************************************
+OBJECT-DEPENDENCIES SECTION
+---------------------------------------------------------------------------------------------
+INITKEY                   USES LCHARACTER LKEY_FLG 
+GETCHAR                   USES LCHARACTER LKEY_FLG 
+ISR_KEYPAD                USES VAR00001 LCHARACTER LKEY_FLG 
+main                      USES FIRST SECOND RESULT 
+_Startup                  USES __SEG_END_SSTACK STARTUP_PLL STARTUP_IO 
+                                STARTUP_SPI0 DISABLE_ENCODER main 
+STARTUP_SPI0              USES DELAY_MILLI 
+STARTUP_ATD1              USES DELAY_MICRO 
+
+*********************************************************************************************
+DEPENDENCY TREE
+*********************************************************************************************
+ main and _Startup Group
+ | 
+ +- main                
+ |    
+ +- Entry               
+      
+ _ORG00001           
+ | 
+ +- Entry                (see above)
+    
+ _ORG00002           
+ | 
+ +- ISR_KEYPAD          
+    | 
+    +- VAR00001            
+         
+*********************************************************************************************
+STATISTIC SECTION
+---------------------------------------------------------------------------------------------
+
+ExeFile:
+--------
+Number of blocks to be downloaded: 7
+Total size of all blocks to be downloaded: 605
+

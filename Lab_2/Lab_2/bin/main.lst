@@ -1,0 +1,447 @@
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+    1    1                      ;************************************************************************************** 
+    2    2                      ;* Lab 2 shell code for students                                                      * 
+    3    3                      ;************************************************************************************** 
+    4    4                      ;* Summary:                                                                           * 
+    5    5                      ;*  This code is designed for use with the 2016 hardware for ME305. This code accepts * 
+    6    6                      ;*  two two-byte integers through the debugger and uses these value to adjust the     * 
+    7    7                      ;*  timing of two pairs of LEDs connected to Port P.                                  * 
+    8    8                      ;*                                                                                    * 
+    9    9                      ;* Author: William R. Murray                                                          * 
+   10   10                      ;*  Cal Poly University                                                               * 
+   11   11                      ;*  January 2020                                                                      * 
+   12   12                      ;*                                                                                    * 
+   13   13                      ;* Revision History:                                                                  * 
+   14   14                      ;*  WRM 04/13/2022                                                                    * 
+   15   15                      ;*   - reduced fully functional Lab 2 code to an almost functioning shell as a        * 
+   16   16                      ;*      starting point for students                                                   * 
+   17   17                      ;*                                                                                    * 
+   18   18                      ;*  ToDo:                                                                             * 
+   19   19                      ;*   - students complete, test, and debug as necessary                                * 
+   20   20                      ;************************************************************************************** 
+   21   21                       
+   22   22                      ;/------------------------------------------------------------------------------------\ 
+   23   23                      ;| Include all associated files                                                       | 
+   24   24                      ;\------------------------------------------------------------------------------------/ 
+   25   25                      ; The following are external files to be included during assembly 
+   26   26                       
+   27   27                       
+   28   28                      ;/------------------------------------------------------------------------------------\ 
+   29   29                      ;| External Definitions                                                               | 
+   30   30                      ;\------------------------------------------------------------------------------------/ 
+   31   31                      ; All labels that are referenced by the linker need an external definition 
+   32   32                       
+   33   33                                    XDEF  main 
+   34   34                       
+   35   35                      ;/------------------------------------------------------------------------------------\ 
+   36   36                      ;| External References                                                                | 
+   37   37                      ;\------------------------------------------------------------------------------------/ 
+   38   38                      ; All labels from other files must have an external reference 
+   39   39                       
+   40   40                                    XREF  ENABLE_MOTOR, DISABLE_MOTOR 
+   41   41                                    XREF  STARTUP_MOTOR, UPDATE_MOTOR, CURRENT_MOTOR 
+   42   42                                    XREF  STARTUP_PWM, STARTUP_ATD0, STARTUP_ATD1 
+   43   43                                    XREF  OUTDACA, OUTDACB 
+   44   44                                    XREF  STARTUP_ENCODER, READ_ENCODER 
+   45   45                                    XREF  INITLCD, SETADDR, GETADDR, CURSOR_ON, CURSOR_OFF, DISP_OFF 
+   46   46                                    XREF  OUTCHAR, OUTCHAR_AT, OUTSTRING, OUTSTRING_AT 
+   47   47                                    XREF  INITKEY, LKEY_FLG, GETCHAR 
+   48   48                                    XREF  LCDTEMPLATE, UPDATELCD_L1, UPDATELCD_L2 
+   49   49                                    XREF  LVREF_BUF, LVACT_BUF, LERR_BUF,LEFF_BUF, LKP_BUF, LKI_BUF 
+   50   50                                    XREF  Entry, ISR_KEYPAD 
+   51   51                       
+   52   52                         
+   53   53                      ;/------------------------------------------------------------------------------------\ 
+   54   54                      ;| Assembler Equates                                                                  | 
+   55   55                      ;\------------------------------------------------------------------------------------/ 
+   56   56                      ; Constant values can be equated here 
+   57   57                       
+   58   58          0000 0258   PORTP         EQU   $0258              ; output port for LEDs 
+   59   59          0000 025A   DDRP          EQU   $025A 
+   60   60                       
+   61   61          0000 0010   G_LED_1       EQU   %00010000          ; green LED output pin for LED pair_1 
+   62   62          0000 0020   R_LED_1       EQU   %00100000          ; red LED output pin for LED pair_1 
+   63   63          0000 0030   LED_MSK_1     EQU   %00110000          ; LED pair_1 
+   64   64          0000 0040   G_LED_2       EQU   %01000000          ; green LED output pin for LED pair_2 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+   65   65          0000 0080   R_LED_2       EQU   %10000000          ; red LED output pin for LED pair_2 
+   66   66          0000 00C0   LED_MSK_2     EQU   %11000000          ; LED pair_2 
+   67   67                       
+   68   68                       
+   69   69                       
+   70   70                       
+   71   71                      ;/------------------------------------------------------------------------------------\ 
+   72   72                      ;| Variables in RAM                                                                   | 
+   73   73                      ;\------------------------------------------------------------------------------------/ 
+   74   74                      ; The following variables are located in unpaged RAM 
+   75   75                       
+   76   76                      DEFAULT_RAM:  SECTION 
+   77   77   000000             DONE_1:       DS.B     1               ; If loop 1 is done
+   78   78   000001             DONE_2:       DS.B     1               ; If loop 2 is done
+   79   79   000002             t1state:      DS.B     1               ; state of task 1; integer counter through task 1 states
+   80   80   000003             t2state:      DS.B     1               ; state of task 2; integer counter through task 2 states
+   81   81   000004             t3state:      DS.B     1               ; ??
+   82   82   000005             t4state:      DS.B     1
+   83   83   000006             t5state:      DS.B     1
+   84   84   000007             COUNT_1:      DS.B     2               ; number of ticks remaining in LED Pair 1 delay
+   85   85   000009             COUNT_2:      DS.B     2               ; number of ticks remaining in LED Pair 2 delay
+   86   86   00000B             TICKS_1:      DS.B     2               ; total number of ms delay for LED Pair 1
+   87   87   00000D             TICKS_2:      DS.B     2               ; total number of ms delay for LED Pair 1 delay
+   88   88                      
+   89   89                      
+   90   90                       
+   91   91                       
+   92   92                      ;/------------------------------------------------------------------------------------\ 
+   93   93                      ;|  Main Program Code                                                                 | 
+   94   94                      ;\------------------------------------------------------------------------------------/ 
+   95   95                      ; This code uses cooperative multitasking for Lab 2 from ME 305 
+   96   96                       
+   97   97                      MyCode:       SECTION 
+   98   98                       
+   99   99                       
+  100  100                      main: 
+  101  101   000000 79xx xx             clr   t1state                  ; initialize all tasks to state0 
+  102  102   000003 79xx xx             clr   t2state 
+  103  103   000006 79xx xx             clr   t3state 
+  104  104   000009 79xx xx             clr   t4state
+  105  105   00000C 79xx xx             clr   t5state
+  106  106                       
+  107  107                      ; Normally no code other than that to clear the state variables and call the tasks 
+  108  108                      ; repeatedly should be in your main program.  However, in this lab we will make a 
+  109  109                      ; one-time exception: the following code will set TICKS_1 and TICKS_2 to default values 
+  110  110                      ; and the BGND will give the user an opportunity to change these values in the debugger. 
+  111  111                       
+  112  112   00000F 1803 0064           movw  #100, TICKS_1            ; set default for TICKS_1 
+             000013 xxxx       
+  113  113   000015 1803 00C8           movw  #200, TICKS_2            ; set default for TICKS_2 
+             000019 xxxx       
+  114  114   00001B 00                  bgnd                           ; stop in DEBUGGER to allow user to alter TICKS 
+  115  115                       
+  116  116                      Top: 
+  117  117   00001C 16xx xx             jsr   TASK_1                   ; execute tasks endlessly 
+  118  118   00001F 16xx xx             jsr   TASK_2 
+  119  119   000022 16xx xx             jsr   TASK_3 
+  120  120   000025 16xx xx             jsr   TASK_4
+  121  121   000028 16xx xx             jsr   TASK_5
+  122  122   00002B 20EF                bra   Top 
+  123  123                              
+  124  124   00002D 20FE        spin:   bra   spin
+  125  125                       
+  126  126                      ;-------------TASK_1 Pattern_1--------------------------------------------------------- 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  127  127   00002F B6xx xx     TASK_1: ldaa  t1state                  ; get current t1state and branch accordingly 
+  128  128   000032 2713                beq   t1state0 
+  129  129   000034 43                  deca 
+  130  130   000035 271E                beq   t1state1 
+  131  131   000037 43                  deca 
+  132  132   000038 272A                beq   t1state2 
+  133  133   00003A 43                  deca 
+  134  134   00003B 2736                beq   t1state3 
+  135  135   00003D 43                  deca 
+  136  136   00003E 2742                beq   t1state4 
+  137  137   000040 43                  deca 
+  138  138   000041 274E                beq   t1state5 
+  139  139   000043 43                  deca 
+  140  140   000044 275A                beq   t1state6 
+  141  141   000046 3D                  rts                            ; undefined state - do nothing but return 
+  142  142                       
+  143  143                      t1state0:                              ; init TASK_1 (not G, not R) 
+  144  144   000047 1D02 5830           bclr  PORTP, LED_MSK_1         ; ensure that LEDs are off when initialized 
+  145  145   00004B 1C02 5A30           bset  DDRP, LED_MSK_1          ; set LED_MSK_1 pins as PORTS outputs 
+  146  146   00004F 180B 01xx           movb  #$01, t1state            ; set next state 
+             000053 xx         
+  147  147   000054 3D                  rts 
+  148  148                       
+  149  149                      t1state1:                              ; G, not R 
+  150  150   000055 1C02 5810           bset  PORTP, G_LED_1           ; set state1 pattern on LEDs 
+  151  151   000059 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  152  152   00005C 2705                beq   exit_t1s1                ; if not done, return 
+  153  153   00005E 180B 02xx           movb  #$02, t1state            ;   otherwise if done, set next state 
+             000062 xx         
+  154  154                      exit_t1s1: 
+  155  155   000063 3D                  rts 
+  156  156                       
+  157  157                      t1state2:                              ; not G, not R 
+  158  158   000064 1D02 5810           bclr  PORTP, G_LED_1           ; set state2 pattern on LEDs 
+  159  159   000068 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  160  160   00006B 2705                beq   exit_t1s2                ; if not done, return 
+  161  161   00006D 180B 03xx           movb  #$03, t1state            ;   otherwise if done, set next state 
+             000071 xx         
+  162  162                      exit_t1s2: 
+  163  163   000072 3D                  rts 
+  164  164                       
+  165  165                      t1state3:                              ; not G, R 
+  166  166   000073 1C02 5820           bset  PORTP, R_LED_1           ; set state3 pattern on LEDs 
+  167  167   000077 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  168  168   00007A 2705                beq   exit_t1s3                ; if not done, return 
+  169  169   00007C 180B 04xx           movb  #$04, t1state            ;   otherwise if done, set next state 
+             000080 xx         
+  170  170                      exit_t1s3: 
+  171  171   000081 3D                  rts 
+  172  172                       
+  173  173                      t1state4                               ; not G, not R 
+  174  174   000082 1D02 5820           bclr  PORTP, R_LED_1           ; set state4 pattern on LEDs 
+  175  175   000086 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  176  176   000089 2705                beq   exit_t1s4                ; if not done, return 
+  177  177   00008B 180B 05xx           movb  #$05, t1state            ;   otherwise if done, set next state 
+             00008F xx         
+  178  178                      exit_t1s4: 
+  179  179   000090 3D                  rts 
+  180  180                       
+  181  181                      t1state5:                              ; G, R 
+  182  182   000091 1C02 5830           bset  PORTP, LED_MSK_1         ; set state5 pattern on LEDs 
+  183  183   000095 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  184  184   000098 2705                beq   exit_t1s5                ; if not done, return 
+  185  185   00009A 180B 06xx           movb  #$06, t1state            ;   otherwise if done, set next state 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+             00009E xx         
+  186  186                      exit_t1s5: 
+  187  187   00009F 3D                  rts 
+  188  188                       
+  189  189                      t1state6:                              ; not G, not R 
+  190  190   0000A0 1D02 5830           bclr  PORTP, LED_MSK_1         ; set state6 pattern on LEDs 
+  191  191   0000A4 F7xx xx             tst   DONE_1                   ; check TASK_1 done flag 
+  192  192   0000A7 2705                beq   exit_t1s6                ; if not done, return 
+  193  193   0000A9 180B 01xx           movb  #$01, t1state            ;   otherwise if done, set next state 
+             0000AD xx         
+  194  194                      exit_t1s6: 
+  195  195   0000AE 3D                  rts                            ; exit TASK_1 
+  196  196                       
+  197  197                       
+  198  198                      ;-------------TASK_2 Timing_1---------------------------------------------------------- 
+  199  199   0000AF B6xx xx     TASK_2: ldaa  t2state                  ; get current t2state and branch accordingly 
+  200  200   0000B2 2704                beq   t2state0 
+  201  201   0000B4 43                  deca 
+  202  202   0000B5 2710                beq   t2state1 
+  203  203   0000B7 3D                  rts                            ; undefined state - do nothing but return 
+  204  204                       
+  205  205                      t2state0:                              ; initialization for TASK_2 
+  206  206   0000B8 1804 xxxx           movw  TICKS_1, COUNT_1         ; init COUNT_1 
+             0000BC xxxx       
+  207  207   0000BE 79xx xx             clr   DONE_1                   ; init DONE_1 to FALSE 
+  208  208   0000C1 180B 01xx           movb  #$01, t2state            ; set next state 
+             0000C5 xx         
+  209  209   0000C6 3D                  rts 
+  210  210                       
+  211  211                      t2state1:                              ; Countdown_1 
+  212  212   0000C7 B6xx xx             ldaa  DONE_1 
+  213  213   0000CA 8101                cmpa  #$01 
+  214  214   0000CC 2609                bne   t2s1a                    ; skip reinitialization if DONE_1 is FALSE
+  215  215   0000CE 1804 xxxx           movw  TICKS_1, COUNT_1
+             0000D2 xxxx       
+  216  216   0000D4 79xx xx             clr   DONE_1
+  217  217                               
+  218  218                      t2s1a:  
+  219  219   0000D7 1873 xxxx           decw  COUNT_1
+  220  220   0000DB 2605                bne  exit_t2s2
+  221  221   0000DD 180B 01xx           movb  #$01, DONE_1
+             0000E1 xx         
+  222  222                                                                                               
+  223  223                      exit_t2s2: 
+  224  224   0000E2 3D                  rts                            ; exit TASK_2 
+  225  225                       
+  226  226                       
+  227  227                      ;-------------TASK_3 Delay 1ms--------------------------------------------------------- 
+  228  228   0000E3 B6xx xx     TASK_3: ldaa  t3state                  ; get current t3state and branch accordingly 
+  229  229   0000E6 2704                beq   t3state0 
+  230  230   0000E8 43                  deca 
+  231  231   0000E9 2707                beq   t3state1 
+  232  232   0000EB 3D                  rts                            ; undefined state - do nothing but return 
+  233  233                       
+  234  234                      t3state0:                              ; initialization for TASK_3 
+  235  235                                                             ; no initialization required 
+  236  236   0000EC 180B 01xx           movb  #$01, t3state            ; set next state 
+             0000F0 xx         
+  237  237   0000F1 3D                  rts 
+  238  238                       
+  239  239                      t3state1: 
+  240  240   0000F2 16xx xx             jsr   DELAY_1ms 
+  241  241   0000F5 3D                  rts                            ; exit TASK_3 
+  242  242                      
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  243  243                      
+  244  244                      ;-------------TASK_4 Pattern_1--------------------------------------------------------- 
+  245  245   0000F6 B6xx xx     TASK_4: ldaa  t4state                  ; get current t4state and branch accordingly 
+  246  246   0000F9 2713                beq   t4state0 
+  247  247   0000FB 43                  deca 
+  248  248   0000FC 271E                beq   t4state1 
+  249  249   0000FE 43                  deca 
+  250  250   0000FF 272A                beq   t4state2 
+  251  251   000101 43                  deca 
+  252  252   000102 2736                beq   t4state3 
+  253  253   000104 43                  deca 
+  254  254   000105 2742                beq   t4state4 
+  255  255   000107 43                  deca 
+  256  256   000108 274E                beq   t4state5 
+  257  257   00010A 43                  deca 
+  258  258   00010B 275A                beq   t4state6 
+  259  259   00010D 3D                  rts                            ; undefined state - do nothing but return 
+  260  260                       
+  261  261                      t4state0:                              ; init TASK_4 (not G, not R) 
+  262  262   00010E 1D02 58C0           bclr  PORTP, LED_MSK_2         ; ensure that LEDs are off when initialized 
+  263  263   000112 1C02 5AC0           bset  DDRP, LED_MSK_2          ; set LED_MSK_2 pins as PORTS outputs 
+  264  264   000116 180B 01xx           movb  #$01, t4state            ; set next state 
+             00011A xx         
+  265  265   00011B 3D                  rts 
+  266  266                       
+  267  267                      t4state1:                              ; G, not R 
+  268  268   00011C 1C02 5840           bset  PORTP, G_LED_2           ; set state1 pattern on LEDs 
+  269  269   000120 F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+  270  270   000123 2705                beq   exit_t4s1                ; if not done, return 
+  271  271   000125 180B 02xx           movb  #$02, t4state            ;   otherwise if done, set next state 
+             000129 xx         
+  272  272                      exit_t4s1: 
+  273  273   00012A 3D                  rts 
+  274  274                       
+  275  275                      t4state2:                              ; not G, not R 
+  276  276   00012B 1D02 5840           bclr  PORTP, G_LED_2           ; set state2 pattern on LEDs 
+  277  277   00012F F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+  278  278   000132 2705                beq   exit_t4s2                ; if not done, return 
+  279  279   000134 180B 03xx           movb  #$03, t4state            ;   otherwise if done, set next state 
+             000138 xx         
+  280  280                      exit_t4s2: 
+  281  281   000139 3D                  rts 
+  282  282                       
+  283  283                      t4state3:                              ; not G, R 
+  284  284   00013A 1C02 5880           bset  PORTP, R_LED_2           ; set state3 pattern on LEDs 
+  285  285   00013E F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+  286  286   000141 2705                beq   exit_t4s3                ; if not done, return 
+  287  287   000143 180B 04xx           movb  #$04, t4state            ;   otherwise if done, set next state 
+             000147 xx         
+  288  288                      exit_t4s3: 
+  289  289   000148 3D                  rts 
+  290  290                       
+  291  291                      t4state4                               ; not G, not R 
+  292  292   000149 1D02 5880           bclr  PORTP, R_LED_2           ; set state4 pattern on LEDs 
+  293  293   00014D F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+  294  294   000150 2705                beq   exit_t4s4                ; if not done, return 
+  295  295   000152 180B 05xx           movb  #$05, t4state            ;   otherwise if done, set next state 
+             000156 xx         
+  296  296                      exit_t4s4: 
+  297  297   000157 3D                  rts 
+  298  298                       
+  299  299                      t4state5:                              ; G, R 
+  300  300   000158 1C02 58C0           bset  PORTP, LED_MSK_2         ; set state5 pattern on LEDs 
+  301  301   00015C F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  302  302   00015F 2705                beq   exit_t4s5                ; if not done, return 
+  303  303   000161 180B 06xx           movb  #$06, t4state            ;   otherwise if done, set next state 
+             000165 xx         
+  304  304                      exit_t4s5: 
+  305  305   000166 3D                  rts 
+  306  306                       
+  307  307                      t4state6:                              ; not G, not R 
+  308  308   000167 1D02 58C0           bclr  PORTP, LED_MSK_2         ; set state6 pattern on LEDs 
+  309  309   00016B F7xx xx             tst   DONE_2                   ; check TASK_4 done flag 
+  310  310   00016E 2705                beq   exit_t4s6                ; if not done, return 
+  311  311   000170 180B 01xx           movb  #$01, t4state            ;   otherwise if done, set next state 
+             000174 xx         
+  312  312                      exit_t4s6: 
+  313  313   000175 3D                  rts                            ; exit TASK_4 
+  314  314                              
+  315  315                      
+  316  316                      ;-------------TASK_5 Timing_2---------------------------------------------------------- 
+  317  317   000176 B6xx xx     TASK_5: ldaa  t5state                  ; get current t5state and branch accordingly 
+  318  318   000179 2704                beq   t5state0 
+  319  319   00017B 43                  deca 
+  320  320   00017C 2710                beq   t5state1 
+  321  321   00017E 3D                  rts                            ; undefined state - do nothing but return 
+  322  322                       
+  323  323                      t5state0:                              ; initialization for TASK_5 
+  324  324   00017F 1804 xxxx           movw  TICKS_2, COUNT_2         ; init COUNT_2 
+             000183 xxxx       
+  325  325   000185 79xx xx             clr   DONE_2                   ; init DONE_2 to FALSE 
+  326  326   000188 180B 01xx           movb  #$01, t5state            ; set next state 
+             00018C xx         
+  327  327   00018D 3D                  rts 
+  328  328                       
+  329  329                      t5state1:                              ; Countdown_2 
+  330  330   00018E B6xx xx             ldaa  DONE_2 
+  331  331   000191 8101                cmpa  #$01 
+  332  332   000193 2609                bne   t5s1a                    ; skip reinitialization if DONE_2 is FALSE
+  333  333   000195 1804 xxxx           movw  TICKS_2, COUNT_2
+             000199 xxxx       
+  334  334   00019B 79xx xx             clr   DONE_2
+  335  335                               
+  336  336                      t5s1a:  
+  337  337   00019E 1873 xxxx           decw  COUNT_2
+  338  338   0001A2 2605                bne  exit_t5s2
+  339  339   0001A4 180B 01xx           movb  #$01, DONE_2
+             0001A8 xx         
+  340  340                                                                                               
+  341  341                      exit_t5s2: 
+  342  342   0001A9 3D                  rts                            ; exit TASK_5 
+  343  343                       
+  344  344                       
+  345  345                       
+  346  346                      ;/------------------------------------------------------------------------------------\ 
+  347  347                      ;| Subroutines                                                                        | 
+  348  348                      ;/------------------------------------------------------------------------------------/ 
+  349  349                       
+  350  350                      ; Add subroutines here: 
+  351  351                       
+  352  352                      DELAY_1ms: 
+  353  353   0001AA CD05 84             ldy   #$0584 
+  354  354                      INNER:                                 ; inside loop 
+  355  355   0001AD 8D00 00             cpy   #0 
+  356  356   0001B0 2703                beq   EXIT 
+  357  357   0001B2 03                  dey 
+  358  358   0001B3 20F8                bra   INNER 
+  359  359                      EXIT: 
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  360  360   0001B5 3D                  rts                            ; exit DELAY_1ms 
+  361  361                       
+  362  362                       
+  363  363                      ;/------------------------------------------------------------------------------------\ 
+  364  364                      ;| Messages                                                                           | 
+  365  365                      ;/------------------------------------------------------------------------------------/ 
+  366  366                       
+  367  367                      ; Add ASCII messages here: 
+  368  368                       
+  369  369                       
+  370  370                       
+  371  371                       
+  372  372                      ;/------------------------------------------------------------------------------------\ 
+  373  373                      ;| Vectors                                                                            | 
+  374  374                      ;\------------------------------------------------------------------------------------/ 
+  375  375                       
+  376  376                      ; Add interrupt and reset vectors here: 
+  377  377                              ORG   $FFFE                    ; reset vector address 
+  378  378  a00FFFE xxxx                DC.W  Entry 
+  379  379                        
+  380  380                       

@@ -1,0 +1,207 @@
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+    1    1                      ;**************************************************************************************
+    2    2                      ;* Homework 5 Main [includes LibV2.2]                                              *
+    3    3                      ;**************************************************************************************
+    4    4                      ;* Summary: 2 byte addition with checks for saturation                                                                          *
+    5    5                      ;*   -                                                                                *
+    6    6                      ;*                                                                                    *
+    7    7                      ;* Author: MILES ALDERMAN                                                                  *
+    8    8                      ;*   Cal Poly University                                                              *
+    9    9                      ;*   Spring 2022                                                                      *
+   10   10                      ;*   ME305-03                                                                                 *
+   11   11                      ;*                                                                 *
+   12   12                      ;*                                                                                *
+   13   13                      ;*                                                                                    *
+   14   14                      ;* ToDo:                                                                              *
+   15   15                      ;*   -                                                                                *
+   16   16                      ;**************************************************************************************
+   17   17                      
+   18   18                      ;/------------------------------------------------------------------------------------\
+   19   19                      ;| Include all associated files                                                       |
+   20   20                      ;\------------------------------------------------------------------------------------/
+   21   21                      ; The following are external files to be included during assembly
+   22   22                      
+   23   23                      
+   24   24                      ;/------------------------------------------------------------------------------------\
+   25   25                      ;| External Definitions                                                               |
+   26   26                      ;\------------------------------------------------------------------------------------/
+   27   27                      ; All labels that are referenced by the linker need an external definition
+   28   28                      
+   29   29                                    XDEF  main
+   30   30                      
+   31   31                      ;/------------------------------------------------------------------------------------\
+   32   32                      ;| External References                                                                |
+   33   33                      ;\------------------------------------------------------------------------------------/
+   34   34                      ; All labels from other files must have an external reference
+   35   35                      
+   36   36                                    XREF  ENABLE_MOTOR, DISABLE_MOTOR
+   37   37                                    XREF  STARTUP_MOTOR, UPDATE_MOTOR, CURRENT_MOTOR
+   38   38                                    XREF  STARTUP_PWM, STARTUP_ATD0, STARTUP_ATD1
+   39   39                                    XREF  OUTDACA, OUTDACB
+   40   40                                    XREF  STARTUP_ENCODER, READ_ENCODER
+   41   41                                    XREF  INITLCD, SETADDR, GETADDR, CURSOR_ON, CURSOR_OFF, DISP_OFF
+   42   42                                    XREF  OUTCHAR, OUTCHAR_AT, OUTSTRING, OUTSTRING_AT
+   43   43                                    XREF  INITKEY, LKEY_FLG, GETCHAR
+   44   44                                    XREF  LCDTEMPLATE, UPDATELCD_L1, UPDATELCD_L2
+   45   45                                    XREF  LVREF_BUF, LVACT_BUF, LERR_BUF,LEFF_BUF, LKP_BUF, LKI_BUF
+   46   46                                    XREF  Entry, ISR_KEYPAD
+   47   47                                  
+   48   48                      ;/------------------------------------------------------------------------------------\
+   49   49                      ;| Assembler Equates                                                                  |
+   50   50                      ;\------------------------------------------------------------------------------------/
+   51   51                      ; Constant values can be equated here
+   52   52                      
+   53   53                      
+   54   54                      
+   55   55                      ;/------------------------------------------------------------------------------------\
+   56   56                      ;| Variables in RAM                                                                   |
+   57   57                      ;\------------------------------------------------------------------------------------/
+   58   58                      ; The following variables are located in unpaged ram
+   59   59                      
+   60   60                      DEFAULT_RAM:  SECTION
+   61   61   000000             TEMP:         DS.B         2
+   62   62                      
+   63   63                      
+   64   64                      ;/------------------------------------------------------------------------------------\
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+   65   65                      ;|  Main Program Code                                                                 |
+   66   66                      ;\------------------------------------------------------------------------------------/
+   67   67                      ; Your code goes here
+   68   68                      
+   69   69                      MyCode:       SECTION
+   70   70   000000 00          main:   bgnd
+   71   71   000001 1879 xxxx           clrw   TEMP
+   72   72                                                      ; syntax: n - low N-flag; N - high N-flag
+   73   73                      
+   74   74                              
+   75   75                              ; NEGATIVE OVERFLOW     ; nzVC
+   76   76   000005 CC8A D0             ldd   #$8AD0    ; -30000
+   77   77   000008 CD8A D0             ldy   #$8AD0    ; -30000
+   78   78   00000B 00                  bgnd
+   79   79   00000C 16xx xx             jsr   adddy     ; -8000 
+   80   80   00000F 00                  bgnd
+   81   81                              
+   82   82                              ; POSITIVE OVERFLOW     ; NzVc
+   83   83   000010 CC4E 20             ldd   #$4E20    ; 20000
+   84   84   000013 CD4E 20             ldy   #$4E20    ; 20000
+   85   85   000016 00                  bgnd
+   86   86   000017 16xx xx             jsr   adddy     ; 40000/ 9C40
+   87   87   00001A 00                  bgnd  
+   88   88                              
+   89   89                              ; VALID POS + POS       ; nzvc
+   90   90   00001B CC1F 11             ldd   #$1F11
+   91   91   00001E CD12 FE             ldy   #$12FE
+   92   92   000021 00                  bgnd
+   93   93   000022 16xx xx             jsr   adddy
+   94   94   000025 00                  bgnd
+   95   95                              
+   96   96                              ; VALID NEG + NEG         ; NzvC
+   97   97   000026 CCBD 98             ldd   #$BD98    ; -17000 
+   98   98   000029 CDD1 20             ldy   #$D120    ; -12000
+   99   99   00002C 00                  bgnd
+  100  100   00002D 16xx xx             jsr   adddy     ; 320F
+  101  101   000030 00                  bgnd    
+  102  102                              
+  103  103                              ; VALID NEG + NEG         ; NzvC
+  104  104   000031 CCFF FB             ldd   #$FFFB    ; -5 
+  105  105   000034 CDFF B0             ldy   #$FFB0    ; -80
+  106  106   000037 00                  bgnd
+  107  107   000038 16xx xx             jsr   adddy     ; FFAB
+  108  108   00003B 00                  bgnd        
+  109  109                                  
+  110  110                              
+  111  111                              ; POS and NEG             ; nzvC
+  112  112   00003C CC71 98             ldd   #$7198    ; 31000
+  113  113   00003F CDD1 20             ldy   #$D120    ; -12000
+  114  114   000042 00                  bgnd
+  115  115   000043 16xx xx             jsr   adddy     ; $8EB8
+  116  116   000046 00                  bgnd        
+  117  117                              
+  118  118                              ; POS and NEG             ; Nzvc
+  119  119   000047 CC01 F4             ldd   #$1F4    ; 500
+  120  120   00004A CD80 00             ldy   #$8000    ; -32768
+  121  121   00004D 00                  bgnd
+  122  122   00004E 16xx xx             jsr   adddy     ; $81F4
+  123  123   000051 00                  bgnd       
+  124  124                                     
+  125  125                              
+  126  126                              ; NON-SAT EDGE CASE HIGH END
+  127  127   000052 CC01 F4             ldd   #$1F4     ; 500
+  128  128   000055 CD7F FF             ldy   #$7FFF    ; 32767
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  129  129   000058 00                  bgnd
+  130  130   000059 16xx xx             jsr   adddy     ; $81F4
+  131  131   00005C 00                  bgnd            
+  132  132                              
+  133  133                              ; NON-SAT EDGE CASE LOW END
+  134  134   00005D CCFF FB             ldd   #$FFFB    ; -5 
+  135  135   000060 CD80 00             ldy   #$8000    ; -32768
+  136  136   000063 00                  bgnd
+  137  137   000064 16xx xx             jsr   adddy     ; $81F4
+  138  138   000067 00                  bgnd 
+  139  139                              
+  140  140   000068 20FE        spin:   bra   spin                     ; endless horizontal loop
+  141  141                      
+  142  142                      
+  143  143                      ;/------------------------------------------------------------------------------------\
+  144  144                      ;| Subroutines                                                                        |
+  145  145                      ;\------------------------------------------------------------------------------------/
+  146  146                      ; General purpose subroutines go here
+  147  147                      
+  148  148                      adddy:
+  149  149   00006A 39                  pshc                                 ; push ccr to stack
+  150  150   00006B 34                  pshx                                 ; push b to stack
+  151  151   00006C 35                  pshy                                 ; push y to stack
+  152  152                                              
+  153  153   00006D 7Dxx xx             sty   TEMP                           ; store y for addition
+  154  154   000070 F3xx xx             addd  TEMP                           ; add d + y
+  155  155                              
+  156  156   000073 2904                bvs   overflow                       ; if V flag is set, the result overflowed
+  157  157                              
+  158  158                      restore:                                     ; LIFO, restores accumulators, registers, CCR, 
+  159  159   000075 31                  puly                                 ; restore index register y from stack
+  160  160   000076 30                  pulx                                 ; restore accumulator b from stack
+  161  161   000077 38                  pulc                                 ; restore ccr from stack        
+  162  162   000078 3D                  rts
+  163  163                      
+  164  164                      overflow:
+  165  165   000079 8D00 00             cpy   #00
+  166  166   00007C 2E05                bgt   pos_overflow                   ; if the value still in y is positive, there was pos overflow 
+  167  167                                                                   ; else there was negative overflow
+  168  168   00007E CC80 00             ldd   #$8000                          ; negative saturation value
+  169  169   000081 20F2                bra   restore
+  170  170                              
+  171  171                      pos_overflow:
+  172  172   000083 CC7F FF             ldd   #$7FFF                         ; positive saturation value
+  173  173   000086 20ED                bra   restore
+  174  174                      
+  175  175                      ;/------------------------------------------------------------------------------------\
+  176  176                      ;| ASCII Messages and Constant Data                                                   |
+  177  177                      ;\------------------------------------------------------------------------------------/
+  178  178                      ; Any constants can be defined here
+  179  179                      
+  180  180                      
+  181  181                      ;/------------------------------------------------------------------------------------\
+  182  182                      ;| Vectors                                                                            |
+  183  183                      ;\------------------------------------------------------------------------------------/
+  184  184                      ; Add interrupt and reset vectors here
+  185  185                      
+  186  186                              ORG   $FFFE                    ; reset vector address
+  187  187  a00FFFE xxxx                DC.W  Entry
+  188  188                              ORG   $FFCE                    ; Key Wakeup interrupt vector address [Port J]
+  189  189  a00FFCE xxxx                DC.W  ISR_KEYPAD

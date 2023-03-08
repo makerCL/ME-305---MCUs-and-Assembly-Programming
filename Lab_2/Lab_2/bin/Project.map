@@ -1,0 +1,318 @@
+
+PROGRAM "C:\Users\melab15\OneDrive - Cal Poly\ME305 Lab\Lab_2\Lab_2\bin\Project.abs"
+
+*********************************************************************************************
+TARGET SECTION
+---------------------------------------------------------------------------------------------
+Processor   : Freescale HC12
+Memory Model: SMALL
+File Format : ELF\DWARF 2.0
+Linker      : SmartLinker V-5.0.40 Build 10203, Jul 23 2010
+
+*********************************************************************************************
+FILE SECTION
+---------------------------------------------------------------------------------------------
+main.asm.o                              Model: SMALL,         Lang: Assembler
+Lib_Delay.asm.o (ME305LIBV2.2.lib)      Model: SMALL,         Lang: Assembler
+Lib_Encoder.asm.o (ME305LIBV2.2.lib)    Model: SMALL,         Lang: Assembler
+Lib_Startup.asm.o (ME305LIBV2.2.lib)    Model: SMALL,         Lang: Assembler
+
+*********************************************************************************************
+STARTUP SECTION
+---------------------------------------------------------------------------------------------
+Entry point: 0xC000 (Entry)
+
+*********************************************************************************************
+SECTION-ALLOCATION SECTION
+Section Name                    Size  Type     From       To       Segment
+---------------------------------------------------------------------------------------------
+.init                            227     R     0xC000     0xC0E2   ROM_C000
+.stack                          1024   R/W     0x2000     0x23FF   RAM
+.data                             15   R/W     0x2400     0x240E   RAM
+MyCode                           438     R     0x4000     0x41B5   ROM_4000
+Lib_Encoder                      177     R      0x800      0x8B0   EEPROM
+Lib_Delay                         56     R      0x8B1      0x8E8   EEPROM
+main.asm__ORG00001                 2     R     0xFFFE     0xFFFF   .absSeg0
+
+Summary of section sizes per section type:
+READ_ONLY (R):         384 (dec:      900)
+READ_WRITE (R/W):      40F (dec:     1039)
+
+*********************************************************************************************
+VECTOR-ALLOCATION SECTION
+    Address     InitValue   InitFunction
+---------------------------------------------------------------------------------------------
+
+*********************************************************************************************
+OBJECT-ALLOCATION SECTION
+     Name               Module                 Addr   hSize   dSize     Ref    Section   RLIB
+---------------------------------------------------------------------------------------------
+MODULE:                 -- main.asm.o --
+- PROCEDURES:
+     main                                      4000      1C      28       1   MyCode      
+     Top                                       401C      11      17       0   MyCode      
+     spin                                      402D       2       2       0   MyCode      
+     TASK_1                                    402F      18      24       1   MyCode      
+     t1state0                                  4047       E      14       0   MyCode      
+     t1state1                                  4055       E      14       0   MyCode      
+     exit_t1s1                                 4063       1       1       0   MyCode      
+     t1state2                                  4064       E      14       0   MyCode      
+     exit_t1s2                                 4072       1       1       0   MyCode      
+     t1state3                                  4073       E      14       0   MyCode      
+     exit_t1s3                                 4081       1       1       0   MyCode      
+     t1state4                                  4082       E      14       0   MyCode      
+     exit_t1s4                                 4090       1       1       0   MyCode      
+     t1state5                                  4091       E      14       0   MyCode      
+     exit_t1s5                                 409F       1       1       0   MyCode      
+     t1state6                                  40A0       E      14       0   MyCode      
+     exit_t1s6                                 40AE       1       1       0   MyCode      
+     TASK_2                                    40AF       9       9       1   MyCode      
+     t2state0                                  40B8       F      15       0   MyCode      
+     t2state1                                  40C7      10      16       0   MyCode      
+     t2s1a                                     40D7       B      11       0   MyCode      
+     exit_t2s2                                 40E2       1       1       0   MyCode      
+     TASK_3                                    40E3       9       9       1   MyCode      
+     t3state0                                  40EC       6       6       0   MyCode      
+     t3state1                                  40F2       4       4       0   MyCode      
+     TASK_4                                    40F6      18      24       1   MyCode      
+     t4state0                                  410E       E      14       0   MyCode      
+     t4state1                                  411C       E      14       0   MyCode      
+     exit_t4s1                                 412A       1       1       0   MyCode      
+     t4state2                                  412B       E      14       0   MyCode      
+     exit_t4s2                                 4139       1       1       0   MyCode      
+     t4state3                                  413A       E      14       0   MyCode      
+     exit_t4s3                                 4148       1       1       0   MyCode      
+     t4state4                                  4149       E      14       0   MyCode      
+     exit_t4s4                                 4157       1       1       0   MyCode      
+     t4state5                                  4158       E      14       0   MyCode      
+     exit_t4s5                                 4166       1       1       0   MyCode      
+     t4state6                                  4167       E      14       0   MyCode      
+     exit_t4s6                                 4175       1       1       0   MyCode      
+     TASK_5                                    4176       9       9       1   MyCode      
+     t5state0                                  417F       F      15       0   MyCode      
+     t5state1                                  418E      10      16       0   MyCode      
+     t5s1a                                     419E       B      11       0   MyCode      
+     exit_t5s2                                 41A9       1       1       0   MyCode      
+     DELAY_1ms                                 41AA       3       3       1   MyCode      
+     INNER                                     41AD       8       8       0   MyCode      
+     EXIT                                      41B5       1       1       0   MyCode      
+- VARIABLES:
+     DONE_1                                    2400       1       1      10   .data       
+     DONE_2                                    2401       1       1      10   .data       
+     t1state                                   2402       1       1       9   .data       
+     t2state                                   2403       1       1       3   .data       
+     t3state                                   2404       1       1       3   .data       
+     t4state                                   2405       1       1       9   .data       
+     t5state                                   2406       1       1       3   .data       
+     COUNT_1                                   2407       2       2       3   .data       
+     COUNT_2                                   2409       2       2       3   .data       
+     TICKS_1                                   240B       2       2       3   .data       
+     TICKS_2                                   240D       2       2       3   .data       
+     VAR00001                                  FFFE       2       2       0   .text       
+MODULE:                 -- Lib_Delay.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     DELAY_MICRO                                8B1       F      15       1   Lib_Delay   
+     MICRO_Loop                                 8C0       D      13       0   Lib_Delay   
+     DELAY_MILLI                                8CD       F      15       1   Lib_Delay   
+     MILLI_Loop                                 8DC       D      13       0   Lib_Delay   
+- VARIABLES:
+MODULE:                 -- Lib_Encoder.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     STARTUP_ENCODER                            800      51      81       0   Lib_Encoder 
+     READ_ENCODER                               851      37      55       0   Lib_Encoder 
+     DISABLE_ENCODER                            888      29      41       1   Lib_Encoder 
+- VARIABLES:
+MODULE:                 -- Lib_Startup.asm.o (ME305LIBV2.2.lib) --
+- PROCEDURES:
+     _Startup                                  C000      13      19       0   .init       
+     Entry                                     C000       0       0       1   .init       
+     STARTUP_PLL                               C013      20      32       1   .init       
+     STARTUP_SPI0                              C033      45      69       1   .init       
+     STARTUP_ATD1                              C078      1A      26       0   .init       
+     STARTUP_PWM                               C092      1D      29       0   .init       
+     STARTUP_IO                                C0AF      34      52       1   .init       
+- VARIABLES:
+- LABELS:
+     __SEG_END_SSTACK                          2400       0       0       1               
+
+*********************************************************************************************
+MODULE STATISTIC
+  Name                                      Data   Code  Const
+---------------------------------------------------------------------------------------------
+  main.asm.o                                  15    438      2
+  Lib_Delay.asm.o (ME305LIBV2.2.lib)           0     56      0
+  Lib_Encoder.asm.o (ME305LIBV2.2.lib)         0    177      0
+  Lib_Startup.asm.o (ME305LIBV2.2.lib)         0    227      0
+  other                                     1024      0      0
+
+*********************************************************************************************
+SECTION USE IN OBJECT-ALLOCATION SECTION
+---------------------------------------------------------------------------------------------
+SECTION: ".text"
+  VAR00001 
+SECTION: ".data"
+  DONE_1 DONE_2 t1state t2state t3state t4state t5state COUNT_1 COUNT_2 
+  TICKS_1 TICKS_2 
+SECTION: ".init"
+  Entry _Startup STARTUP_PLL STARTUP_SPI0 STARTUP_ATD1 STARTUP_PWM STARTUP_IO 
+SECTION: "MyCode"
+  main Top spin TASK_1 t1state0 t1state1 exit_t1s1 t1state2 exit_t1s2 t1state3 
+  exit_t1s3 t1state4 exit_t1s4 t1state5 exit_t1s5 t1state6 exit_t1s6 TASK_2 
+  t2state0 t2state1 t2s1a exit_t2s2 TASK_3 t3state0 t3state1 TASK_4 t4state0 
+  t4state1 exit_t4s1 t4state2 exit_t4s2 t4state3 exit_t4s3 t4state4 exit_t4s4 
+  t4state5 exit_t4s5 t4state6 exit_t4s6 TASK_5 t5state0 t5state1 t5s1a 
+  exit_t5s2 DELAY_1ms INNER EXIT 
+SECTION: "Lib_Encoder"
+  STARTUP_ENCODER READ_ENCODER DISABLE_ENCODER 
+SECTION: "Lib_Delay"
+  DELAY_MICRO MICRO_Loop DELAY_MILLI MILLI_Loop 
+
+*********************************************************************************************
+OBJECT LIST SORTED BY ADDRESS
+     Name                                      Addr   hSize   dSize     Ref    Section   RLIB
+---------------------------------------------------------------------------------------------
+     STARTUP_ENCODER                            800      51      81       0   Lib_Encoder 
+     READ_ENCODER                               851      37      55       0   Lib_Encoder 
+     DISABLE_ENCODER                            888      29      41       1   Lib_Encoder 
+     DELAY_MICRO                                8B1       F      15       1   Lib_Delay   
+     MICRO_Loop                                 8C0       D      13       0   Lib_Delay   
+     DELAY_MILLI                                8CD       F      15       1   Lib_Delay   
+     MILLI_Loop                                 8DC       D      13       0   Lib_Delay   
+     DONE_1                                    2400       1       1      10   .data       
+     DONE_2                                    2401       1       1      10   .data       
+     t1state                                   2402       1       1       9   .data       
+     t2state                                   2403       1       1       3   .data       
+     t3state                                   2404       1       1       3   .data       
+     t4state                                   2405       1       1       9   .data       
+     t5state                                   2406       1       1       3   .data       
+     COUNT_1                                   2407       2       2       3   .data       
+     COUNT_2                                   2409       2       2       3   .data       
+     TICKS_1                                   240B       2       2       3   .data       
+     TICKS_2                                   240D       2       2       3   .data       
+     main                                      4000      1C      28       1   MyCode      
+     Top                                       401C      11      17       0   MyCode      
+     spin                                      402D       2       2       0   MyCode      
+     TASK_1                                    402F      18      24       1   MyCode      
+     t1state0                                  4047       E      14       0   MyCode      
+     t1state1                                  4055       E      14       0   MyCode      
+     exit_t1s1                                 4063       1       1       0   MyCode      
+     t1state2                                  4064       E      14       0   MyCode      
+     exit_t1s2                                 4072       1       1       0   MyCode      
+     t1state3                                  4073       E      14       0   MyCode      
+     exit_t1s3                                 4081       1       1       0   MyCode      
+     t1state4                                  4082       E      14       0   MyCode      
+     exit_t1s4                                 4090       1       1       0   MyCode      
+     t1state5                                  4091       E      14       0   MyCode      
+     exit_t1s5                                 409F       1       1       0   MyCode      
+     t1state6                                  40A0       E      14       0   MyCode      
+     exit_t1s6                                 40AE       1       1       0   MyCode      
+     TASK_2                                    40AF       9       9       1   MyCode      
+     t2state0                                  40B8       F      15       0   MyCode      
+     t2state1                                  40C7      10      16       0   MyCode      
+     t2s1a                                     40D7       B      11       0   MyCode      
+     exit_t2s2                                 40E2       1       1       0   MyCode      
+     TASK_3                                    40E3       9       9       1   MyCode      
+     t3state0                                  40EC       6       6       0   MyCode      
+     t3state1                                  40F2       4       4       0   MyCode      
+     TASK_4                                    40F6      18      24       1   MyCode      
+     t4state0                                  410E       E      14       0   MyCode      
+     t4state1                                  411C       E      14       0   MyCode      
+     exit_t4s1                                 412A       1       1       0   MyCode      
+     t4state2                                  412B       E      14       0   MyCode      
+     exit_t4s2                                 4139       1       1       0   MyCode      
+     t4state3                                  413A       E      14       0   MyCode      
+     exit_t4s3                                 4148       1       1       0   MyCode      
+     t4state4                                  4149       E      14       0   MyCode      
+     exit_t4s4                                 4157       1       1       0   MyCode      
+     t4state5                                  4158       E      14       0   MyCode      
+     exit_t4s5                                 4166       1       1       0   MyCode      
+     t4state6                                  4167       E      14       0   MyCode      
+     exit_t4s6                                 4175       1       1       0   MyCode      
+     TASK_5                                    4176       9       9       1   MyCode      
+     t5state0                                  417F       F      15       0   MyCode      
+     t5state1                                  418E      10      16       0   MyCode      
+     t5s1a                                     419E       B      11       0   MyCode      
+     exit_t5s2                                 41A9       1       1       0   MyCode      
+     DELAY_1ms                                 41AA       3       3       1   MyCode      
+     INNER                                     41AD       8       8       0   MyCode      
+     EXIT                                      41B5       1       1       0   MyCode      
+     Entry                                     C000       0       0       1   .init       
+     _Startup                                  C000      13      19       0   .init       
+     STARTUP_PLL                               C013      20      32       1   .init       
+     STARTUP_SPI0                              C033      45      69       1   .init       
+     STARTUP_ATD1                              C078      1A      26       0   .init       
+     STARTUP_PWM                               C092      1D      29       0   .init       
+     STARTUP_IO                                C0AF      34      52       1   .init       
+     VAR00001                                  FFFE       2       2       0   .text       
+
+*********************************************************************************************
+UNUSED-OBJECTS SECTION
+---------------------------------------------------------------------------------------------
+NOT USED VARIABLES
+main.asm.o:
+  LKEY_FLG LVREF_BUF LVACT_BUF LERR_BUF LEFF_BUF LKP_BUF LKI_BUF 
+
+*********************************************************************************************
+COPYDOWN SECTION
+---------------------------------------------------------------------------------------------
+
+*********************************************************************************************
+OBJECT-DEPENDENCIES SECTION
+---------------------------------------------------------------------------------------------
+main                      USES t1state t2state t3state t4state t5state TICKS_1 
+                                TICKS_2 
+Top                       USES TASK_1 TASK_2 TASK_3 TASK_4 TASK_5 
+TASK_1                    USES t1state 
+t1state0                  USES t1state 
+t1state1                  USES DONE_1 t1state 
+t1state2                  USES DONE_1 t1state 
+t1state3                  USES DONE_1 t1state 
+t1state4                  USES DONE_1 t1state 
+t1state5                  USES DONE_1 t1state 
+t1state6                  USES DONE_1 t1state 
+TASK_2                    USES t2state 
+t2state0                  USES TICKS_1 COUNT_1 DONE_1 t2state 
+t2state1                  USES DONE_1 TICKS_1 COUNT_1 
+t2s1a                     USES COUNT_1 DONE_1 
+TASK_3                    USES t3state 
+t3state0                  USES t3state 
+t3state1                  USES DELAY_1ms 
+TASK_4                    USES t4state 
+t4state0                  USES t4state 
+t4state1                  USES DONE_2 t4state 
+t4state2                  USES DONE_2 t4state 
+t4state3                  USES DONE_2 t4state 
+t4state4                  USES DONE_2 t4state 
+t4state5                  USES DONE_2 t4state 
+t4state6                  USES DONE_2 t4state 
+TASK_5                    USES t5state 
+t5state0                  USES TICKS_2 COUNT_2 DONE_2 t5state 
+t5state1                  USES DONE_2 TICKS_2 COUNT_2 
+t5s1a                     USES COUNT_2 DONE_2 
+_Startup                  USES __SEG_END_SSTACK STARTUP_PLL STARTUP_IO 
+                                STARTUP_SPI0 DISABLE_ENCODER main 
+STARTUP_SPI0              USES DELAY_MILLI 
+STARTUP_ATD1              USES DELAY_MICRO 
+
+*********************************************************************************************
+DEPENDENCY TREE
+*********************************************************************************************
+ main and _Startup Group
+ | 
+ +- main                
+ |    
+ +- Entry               
+      
+ _ORG00001           
+ | 
+ +- Entry                (see above)
+    
+*********************************************************************************************
+STATISTIC SECTION
+---------------------------------------------------------------------------------------------
+
+ExeFile:
+--------
+Number of blocks to be downloaded: 5
+Total size of all blocks to be downloaded: 900
+

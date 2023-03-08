@@ -1,0 +1,158 @@
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+    1    1                      ;**************************************************************************************
+    2    2                      ;* Blank Project Main [includes LibV2.2]                                              *
+    3    3                      ;**************************************************************************************
+    4    4                      ;* Summary:                                                                           *
+    5    5                      ;*   -                                                                                *
+    6    6                      ;*                                                                                    *
+    7    7                      ;* Author: YOUR NAME                                                                  *
+    8    8                      ;*   Cal Poly University                                                              *
+    9    9                      ;*   Spring 2022                                                                      *
+   10   10                      ;*                                                                                    *
+   11   11                      ;* Revision History:                                                                  *
+   12   12                      ;*   -                                                                                *
+   13   13                      ;*                                                                                    *
+   14   14                      ;* ToDo:                                                                              *
+   15   15                      ;*   -                                                                                *
+   16   16                      ;**************************************************************************************
+   17   17                      
+   18   18                      ;/------------------------------------------------------------------------------------\
+   19   19                      ;| Include all associated files                                                       |
+   20   20                      ;\------------------------------------------------------------------------------------/
+   21   21                      ; The following are external files to be included during assembly
+   22   22                      
+   23   23                      
+   24   24                      ;/------------------------------------------------------------------------------------\
+   25   25                      ;| External Definitions                                                               |
+   26   26                      ;\------------------------------------------------------------------------------------/
+   27   27                      ; All labels that are referenced by the linker need an external definition
+   28   28                      
+   29   29                                    XDEF  main
+   30   30                      
+   31   31                      ;/------------------------------------------------------------------------------------\
+   32   32                      ;| External References                                                                |
+   33   33                      ;\------------------------------------------------------------------------------------/
+   34   34                      ; All labels from other files must have an external reference
+   35   35                      
+   36   36                                    XREF  ENABLE_MOTOR, DISABLE_MOTOR
+   37   37                                    XREF  STARTUP_MOTOR, UPDATE_MOTOR, CURRENT_MOTOR
+   38   38                                    XREF  STARTUP_PWM, STARTUP_ATD0, STARTUP_ATD1
+   39   39                                    XREF  OUTDACA, OUTDACB
+   40   40                                    XREF  STARTUP_ENCODER, READ_ENCODER
+   41   41                                    XREF  INITLCD, SETADDR, GETADDR, CURSOR_ON, CURSOR_OFF, DISP_OFF
+   42   42                                    XREF  OUTCHAR, OUTCHAR_AT, OUTSTRING, OUTSTRING_AT
+   43   43                                    XREF  INITKEY, LKEY_FLG, GETCHAR
+   44   44                                    XREF  LCDTEMPLATE, UPDATELCD_L1, UPDATELCD_L2
+   45   45                                    XREF  LVREF_BUF, LVACT_BUF, LERR_BUF,LEFF_BUF, LKP_BUF, LKI_BUF
+   46   46                                    XREF  Entry, ISR_KEYPAD
+   47   47                                  
+   48   48                      ;/------------------------------------------------------------------------------------\
+   49   49                      ;| Assembler Equates                                                                  |
+   50   50                      ;\------------------------------------------------------------------------------------/
+   51   51                      ; Constant values can be equated here
+   52   52                      
+   53   53          0000 03E0   INTERVAL      EQU   $03E0        ;number of clock pulses that equal 0.1ms from 10.2MHz clock
+   54   54                      
+   55   55          0000 0040   TIOS          EQU   $0040        ; addr of tios register
+   56   56          0000 0001   Chan0         EQU   %00000001    ;offset for channel 0
+   57   57                      
+   58   58          0000 0049   TCTL2         EQU   $0049        ; TCTL2 register that contains OL0 and OM0
+   59   59          0000 0001   OL0           EQU   %00000001    ; mask for 0L0 in TCTL2
+   60   60                      
+   61   61          0000 004E   TFLG1         EQU   $004E        ; Main timer interupt flag 1
+   62   62          0000 0001   C0F           EQU   %00000001    ; mask for C0F in TFLG1
+   63   63                      
+   64   64          0000 004C   TMSK1         EQU   $004C        ; Timer interupt mask
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+   65   65          0000 0001   C0I           EQU   %00000001    ; mask for C0I
+   66   66                      
+   67   67          0000 0046   TSCR          EQU   $0046        ; Timer system control
+   68   68          0000 00A0   TSCR_msk      EQU   %10100000    ; mask for timer system control
+   69   69                      
+   70   70          0000 0044   TCNT          EQU   $0044        ; first byte of timer count register
+   71   71                      
+   72   72          0000 0050   TC0           EQU   $0050        ; Timer channel 0 first (high) byte
+   73   73                      
+   74   74                      
+   75   75                      
+   76   76                      ;/------------------------------------------------------------------------------------\
+   77   77                      ;| Variables in RAM                                                                   |
+   78   78                      ;\------------------------------------------------------------------------------------/
+   79   79                      ; The following variables are located in unpaged ram
+   80   80                      
+   81   81                      DEFAULT_RAM:  SECTION
+   82   82                      
+   83   83                      
+   84   84                      
+   85   85                      ;/------------------------------------------------------------------------------------\
+   86   86                      ;|  Main Program Code                                                                 |
+   87   87                      ;\------------------------------------------------------------------------------------/
+   88   88                      ; Your code goes here
+   89   89                      
+   90   90                      MyCode:       SECTION
+   91   91                      main:   
+   92   92   000000 00                  bgnd
+   93   93                      setup:                                 ; step 2
+   94   94   000001 4C40 01             bset  TIOS, Chan0              ; set timer chan 0 for output compare
+   95   95   000004 4C49 01             bset  TCTL2, OL0               ; toggle tc0 for successful compare, OM0:OL0 should be 01
+   96   96   000007 4C4E 01             bset  TFLG1, C0F               ; clear timer output compare flag by writing a 1 to it
+   97   97   00000A 10EF                cli                            ; clear I bit to enable maskable interupts
+   98   98   00000C 4C4C 01             bset  TMSK1, C0I               ; enable timer overflow flag to trigger input
+   99   99                      
+  100  100                      first_interrupt:                        ; step 3
+  101  101   00000F 4C46 A0             bset  TSCR, TSCR_msk           ; freeze mode when debugger stops executing
+  102  102   000012 DC44                ldd   TCNT                     ; load $0044:$0045 into d
+  103  103   000014 C303 E0             addd  #INTERVAL                ; add interval to timer count
+  104  104   000017 5C50                std   TC0                      ; store in timer channel 0
+  105  105                      
+  106  106   000019 20FE        spin:   bra   spin                     ; endless horizontal loop
+  107  107                              
+  108  108                      ISR:                                   ; step 4
+  109  109   00001B DC44                ldd   TCNT                     ; load $0044:$0045 into d
+  110  110   00001D C303 E0             addd  #INTERVAL                ; add interval to timer count
+  111  111   000020 5C50                std   TC0                      ; store in timer channel 0
+  112  112   000022 4C4E 01             bset  TFLG1, C0F               ; clear timer output compare flag by writing a 1 to it
+  113  113   000025 0B                  rti
+  114  114                                 
+  115  115                      
+  116  116                      
+  117  117                      
+  118  118                      ;/------------------------------------------------------------------------------------\
+  119  119                      ;| Subroutines                                                                        |
+  120  120                      ;\------------------------------------------------------------------------------------/
+  121  121                      ; General purpose subroutines go here
+  122  122                      
+  123  123                      
+  124  124                      ;/------------------------------------------------------------------------------------\
+  125  125                      ;| ASCII Messages and Constant Data                                                   |
+  126  126                      ;\------------------------------------------------------------------------------------/
+  127  127                      ; Any constants can be defined here
+  128  128                      
+
+Freescale HC12-Assembler 
+(c) Copyright Freescale 1987-2010
+
+ Abs. Rel.   Loc    Obj. code   Source line
+ ---- ----   ------ ---------   -----------
+  129  129                      
+  130  130                      ;/------------------------------------------------------------------------------------\
+  131  131                      ;| Vectors                                                                            |
+  132  132                      ;\------------------------------------------------------------------------------------/
+  133  133                      ; Add interrupt and reset vectors here
+  134  134                      
+  135  135                              ORG   $FFEE                    ; timer ch0 vector address
+  136  136  a00FFEE xxxx                DC.W  ISR
+  137  137                              ORG   $FFFE                    ; reset vector address
+  138  138  a00FFFE xxxx                DC.W  Entry
+  139  139                              ORG   $FFCE                    ; Key Wakeup interrupt vector address [Port J]
+  140  140  a00FFCE xxxx                DC.W  ISR_KEYPAD
